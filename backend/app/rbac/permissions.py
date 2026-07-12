@@ -5,6 +5,7 @@ from app.models import Role
 
 class Permission(str, enum.Enum):
     org_read = "org:read"
+    org_update = "org:update"
     org_manage_members = "org:manage_members"
     project_read = "project:read"
     project_write = "project:write"
@@ -21,6 +22,7 @@ ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
     Role.owner: set(Permission),
     Role.admin: {
         Permission.org_read,
+        Permission.org_update,
         Permission.org_manage_members,
         Permission.project_read,
         Permission.project_write,

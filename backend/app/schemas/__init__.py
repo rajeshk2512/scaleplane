@@ -10,10 +10,15 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    organization_id: UUID | None = None
 
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class SwitchOrgRequest(BaseModel):
+    organization_id: UUID
 
 
 class UserRegister(BaseModel):
@@ -44,6 +49,25 @@ class OrganizationResponse(BaseModel):
     name: str
     is_default: bool
     created_at: datetime
+
+
+class OrganizationCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    slug: str = Field(min_length=1, max_length=100, pattern=r"^[a-z0-9-]+$")
+
+
+class OrganizationUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    slug: str | None = Field(default=None, min_length=1, max_length=100, pattern=r"^[a-z0-9-]+$")
+
+
+class OrganizationWithRoleResponse(OrganizationResponse):
+    role: Role
+
+
+class OrganizationCreateResponse(BaseModel):
+    organization: OrganizationWithRoleResponse
+    tokens: TokenResponse
 
 
 class MemberResponse(BaseModel):

@@ -25,22 +25,32 @@ def create_token(data: dict[str, Any], expires_delta: timedelta, token_type: str
     return jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
 
 
-def create_access_token(subject: str) -> str:
+def create_access_token(subject: str, org_id: str | None = None) -> str:
     settings = get_settings()
+    payload: dict[str, Any] = {"sub": subject}
+    if org_id:
+        payload["org_id"] = org_id
     return create_token(
-        {"sub": subject},
+        payload,
         timedelta(minutes=settings.access_token_expire_minutes),
         "access",
     )
 
 
-def create_refresh_token(subject: str) -> str:
+def create_refresh_token(subject: str, org_id: str | None = None) -> str:
     settings = get_settings()
+    payload: dict[str, Any] = {"sub": subject}
+    if org_id:
+        payload["org_id"] = org_id
     return create_token(
-        {"sub": subject},
+        payload,
         timedelta(days=settings.refresh_token_expire_days),
         "refresh",
     )
+
+
+def issue_tokens(user_id: str, org_id: str | None = None) -> tuple[str, str]:
+    return create_access_token(user_id, org_id), create_refresh_token(user_id, org_id)
 
 
 def decode_token(token: str) -> dict[str, Any]:

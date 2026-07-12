@@ -11,6 +11,7 @@ export interface TokenResponse {
   access_token: string
   refresh_token: string
   token_type: string
+  organization_id: string | null
 }
 
 export interface Organization {
@@ -19,6 +20,15 @@ export interface Organization {
   name: string
   is_default: boolean
   created_at: string
+}
+
+export interface OrganizationWithRole extends Organization {
+  role: 'owner' | 'admin' | 'editor' | 'viewer'
+}
+
+export interface OrganizationCreateResponse {
+  organization: OrganizationWithRole
+  tokens: TokenResponse
 }
 
 export interface Project {
@@ -89,18 +99,37 @@ class ApiError extends Error {
   }
 }
 
+function getOrgIdFromToken(token: string): string | null {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.org_id ?? null
+  } catch {
+    return null
+  }
+}
+
 function getToken(): string | null {
   return localStorage.getItem('access_token')
 }
 
-export function setTokens(access: string, refresh: string) {
+function getOrganizationId(): string | null {
+  return localStorage.getItem('organization_id') || (getToken() ? getOrgIdFromToken(getToken()!) : null)
+}
+
+export function setTokens(access: string, refresh: string, organizationId?: string | null) {
   localStorage.setItem('access_token', access)
   localStorage.setItem('refresh_token', refresh)
+  if (organizationId) {
+    localStorage.setItem('organization_id', organizationId)
+  } else {
+    localStorage.removeItem('organization_id')
+  }
 }
 
 export function clearTokens() {
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
+  localStorage.removeItem('organization_id')
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -133,9 +162,29 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  switchOrg: (organizationId: string) =>
+    request<TokenResponse>('/auth/switch-org', {
+      method: 'POST',
+      body: JSON.stringify({ organization_id: organizationId }),
+    }),
+
   me: () => request<User>('/users/me'),
 
+  listOrgs: () => request<OrganizationWithRole[]>('/organizations'),
+
+  createOrg: (name: string, slug: string) =>
+    request<OrganizationCreateResponse>('/organizations', {
+      method: 'POST',
+      body: JSON.stringify({ name, slug }),
+    }),
+
   currentOrg: () => request<Organization>('/organizations/current'),
+
+  updateOrg: (data: { name?: string; slug?: string }) =>
+    request<Organization>('/organizations/current', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 
   listMembers: () => request<Member[]>('/organizations/current/members'),
 
@@ -205,4 +254,4 @@ export const api = {
     }),
 }
 
-export { ApiError }
+export { ApiError, getOrganizationId }

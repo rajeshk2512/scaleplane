@@ -22,6 +22,8 @@ from app.rbac.deps import AuthContext
 from app.schemas import (
     MemberCreate,
     MemberUpdate,
+    OrganizationCreate,
+    OrganizationUpdate,
     ProjectCreate,
     PromptCreate,
     PromptVersionCreate,
@@ -48,12 +50,20 @@ async def ensure_default_organization(db: AsyncSession) -> Organization:
     return org
 
 
+async def get_first_membership(db: AsyncSession, user_id: UUID) -> OrganizationMember | None:
+    result = await db.execute(
+        select(OrganizationMember)
+        .where(OrganizationMember.user_id == user_id)
+        .order_by(OrganizationMember.created_at)
+    )
+    return result.scalars().first()
+
+
 async def register_user(db: AsyncSession, data: UserRegister) -> User:
     existing = await db.execute(select(User).where(User.email == data.email.lower()))
     if existing.scalar_one_or_none():
         raise ValueError("Email already registered")
 
-    org = await ensure_default_organization(db)
     user = User(
         email=data.email.lower(),
         password_hash=hash_password(data.password),
@@ -61,23 +71,58 @@ async def register_user(db: AsyncSession, data: UserRegister) -> User:
     )
     db.add(user)
     await db.flush()
-
-    member_count = await db.scalar(
-        select(func.count()).select_from(OrganizationMember).where(
-            OrganizationMember.organization_id == org.id
-        )
-    )
-    role = Role.owner if member_count == 0 else Role.viewer
-
-    db.add(
-        OrganizationMember(
-            user_id=user.id,
-            organization_id=org.id,
-            role=role,
-        )
-    )
-    await db.flush()
     return user
+
+
+async def create_organization(
+    db: AsyncSession, user: User, data: OrganizationCreate
+) -> tuple[Organization, OrganizationMember]:
+    existing = await db.execute(select(Organization).where(Organization.slug == data.slug))
+    if existing.scalar_one_or_none():
+        raise ValueError("Organization slug already exists")
+
+    org = Organization(
+        slug=data.slug,
+        name=data.name,
+        is_default=False,
+    )
+    db.add(org)
+    await db.flush()
+
+    membership = OrganizationMember(
+        user_id=user.id,
+        organization_id=org.id,
+        role=Role.owner,
+    )
+    db.add(membership)
+    await db.flush()
+    return org, membership
+
+
+async def list_user_organizations(db: AsyncSession, user: User) -> list[tuple[Organization, Role]]:
+    result = await db.execute(
+        select(Organization, OrganizationMember.role)
+        .join(OrganizationMember, OrganizationMember.organization_id == Organization.id)
+        .where(OrganizationMember.user_id == user.id)
+        .order_by(OrganizationMember.created_at)
+    )
+    return list(result.all())
+
+
+async def update_organization(
+    db: AsyncSession, ctx: AuthContext, data: OrganizationUpdate
+) -> Organization:
+    if data.slug and data.slug != ctx.organization.slug:
+        existing = await db.execute(select(Organization).where(Organization.slug == data.slug))
+        if existing.scalar_one_or_none():
+            raise ValueError("Organization slug already exists")
+        ctx.organization.slug = data.slug
+
+    if data.name is not None:
+        ctx.organization.name = data.name
+
+    await db.flush()
+    return ctx.organization
 
 
 async def add_member(db: AsyncSession, ctx: AuthContext, data: MemberCreate) -> OrganizationMember:
