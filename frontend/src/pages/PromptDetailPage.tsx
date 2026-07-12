@@ -1,11 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FormEvent, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { api } from '../api/client'
+import { api, ENVIRONMENT_TAGS, EnvironmentTag } from '../api/client'
 import { AppLayout } from '../components/AppLayout'
 import { Badge } from '../components/Badge'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
+
+const TAG_LABELS: Record<EnvironmentTag, string> = {
+  production: 'Production',
+  staging: 'Staging',
+  dev: 'Dev',
+}
 
 export function PromptDetailPage() {
   const { promptId } = useParams<{ promptId: string }>()
@@ -25,7 +31,8 @@ export function PromptDetailPage() {
 
   const [newContent, setNewContent] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [resolved, setResolved] = useState<string | null>(null)
+  const [selectedTag, setSelectedTag] = useState<EnvironmentTag>('staging')
+  const [resolved, setResolved] = useState<{ tag: EnvironmentTag; content: string } | null>(null)
 
   const createVersion = useMutation({
     mutationFn: () => api.createVersion(promptId!, newContent),
@@ -38,15 +45,16 @@ export function PromptDetailPage() {
   })
 
   const promote = useMutation({
-    mutationFn: (versionNumber: number) => api.promoteTag(promptId!, 'production', versionNumber),
+    mutationFn: ({ versionNumber, tag }: { versionNumber: number; tag: EnvironmentTag }) =>
+      api.promoteTag(promptId!, tag, versionNumber),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['prompt', promptId] })
     },
   })
 
   const resolve = useMutation({
-    mutationFn: () => api.resolvePrompt(promptId!, 'production'),
-    onSuccess: (data) => setResolved(data.content),
+    mutationFn: (tag: EnvironmentTag) => api.resolvePrompt(promptId!, tag),
+    onSuccess: (data, tag) => setResolved({ tag, content: data.content }),
   })
 
   const handleSubmit = (e: FormEvent) => {
@@ -68,22 +76,44 @@ export function PromptDetailPage() {
         <div>
           <h1 className="font-display text-3xl font-bold text-navy">{prompt?.name ?? 'Prompt'}</h1>
           <p className="mt-1 font-mono text-sm text-slate">{prompt?.slug}</p>
-          {prompt?.production_tag_version && (
-            <span className="mt-2 inline-block">
-              <Badge variant="amber">production → v{prompt.production_tag_version}</Badge>
-            </span>
-          )}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {ENVIRONMENT_TAGS.map((tag) => {
+              const version = prompt?.environment_tags?.[tag]
+              return (
+                <Badge key={tag} variant={tag === 'production' ? 'amber' : 'teal'}>
+                  {tag} → {version ? `v${version}` : '—'}
+                </Badge>
+              )
+            })}
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => resolve.mutate()}>Resolve production</Button>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedTag}
+            onChange={(e) => setSelectedTag(e.target.value as EnvironmentTag)}
+            className="min-h-[44px] rounded-brand border border-mist bg-white px-3 py-2 text-sm text-navy outline-none focus:border-teal"
+          >
+            {ENVIRONMENT_TAGS.map((tag) => (
+              <option key={tag} value={tag}>
+                {TAG_LABELS[tag]}
+              </option>
+            ))}
+          </select>
+          <Button variant="ghost" onClick={() => resolve.mutate(selectedTag)}>
+            Resolve {TAG_LABELS[selectedTag].toLowerCase()}
+          </Button>
           {!showForm && <Button onClick={() => setShowForm(true)}>New version</Button>}
         </div>
       </div>
 
       {resolved && (
         <Card className="mb-6">
-          <h2 className="mb-2 font-display text-lg font-medium text-navy">Resolved content (production)</h2>
-          <pre className="whitespace-pre-wrap rounded-brand bg-cloud p-4 font-mono text-sm text-navy">{resolved}</pre>
+          <h2 className="mb-2 font-display text-lg font-medium text-navy">
+            Resolved content ({resolved.tag})
+          </h2>
+          <pre className="whitespace-pre-wrap rounded-brand bg-cloud p-4 font-mono text-sm text-navy">
+            {resolved.content}
+          </pre>
         </Card>
       )}
 
@@ -123,9 +153,9 @@ export function PromptDetailPage() {
                   <Button
                     variant="ghost"
                     className="!min-h-0 !py-1 !text-xs"
-                    onClick={() => promote.mutate(v.version_number)}
+                    onClick={() => promote.mutate({ versionNumber: v.version_number, tag: selectedTag })}
                   >
-                    Promote to production
+                    Promote to {selectedTag}
                   </Button>
                 </div>
                 <pre className="max-h-40 overflow-auto whitespace-pre-wrap font-mono text-xs text-slate">

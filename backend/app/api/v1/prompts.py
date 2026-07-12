@@ -11,7 +11,9 @@ from app.models import Project, Prompt, PromptTag, PromptVersion
 from app.rbac.deps import AuthContext, require_permission
 from app.rbac.permissions import Permission
 from app.schemas import (
+    ENVIRONMENT_TAGS,
     PromptCreate,
+    PromptEnvironmentTags,
     PromptResolveResponse,
     PromptResponse,
     PromptTagResponse,
@@ -27,12 +29,20 @@ async def _get_prompt_response(db: AsyncSession, prompt: Prompt) -> PromptRespon
     latest = await db.scalar(
         select(func.max(PromptVersion.version_number)).where(PromptVersion.prompt_id == prompt.id)
     )
-    prod_tag = await db.execute(
+    tag_result = await db.execute(
         select(PromptTag)
-        .where(PromptTag.prompt_id == prompt.id, PromptTag.name == "production")
+        .where(PromptTag.prompt_id == prompt.id, PromptTag.name.in_(ENVIRONMENT_TAGS))
         .options(selectinload(PromptTag.version))
     )
-    prod = prod_tag.scalar_one_or_none()
+    tag_versions = {
+        tag.name: tag.version.version_number
+        for tag in tag_result.scalars().all()
+    }
+    environment_tags = PromptEnvironmentTags(
+        production=tag_versions.get("production"),
+        staging=tag_versions.get("staging"),
+        dev=tag_versions.get("dev"),
+    )
     return PromptResponse(
         id=prompt.id,
         project_id=prompt.project_id,
@@ -42,7 +52,8 @@ async def _get_prompt_response(db: AsyncSession, prompt: Prompt) -> PromptRespon
         description=prompt.description,
         created_at=prompt.created_at,
         latest_version_number=latest,
-        production_tag_version=prod.version.version_number if prod else None,
+        production_tag_version=environment_tags.production,
+        environment_tags=environment_tags,
     )
 
 

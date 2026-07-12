@@ -48,12 +48,30 @@ async def test_prompt_versioning_flow(owner_client: AsyncClient):
     assert version.status_code == 201
     assert version.json()["version_number"] == 2
 
+    staging = await owner_client.put(
+        f"/api/v1/prompts/{prompt_id}/tags/staging",
+        params={"version_number": 2},
+    )
+    assert staging.status_code == 200
+    assert staging.json()["version_number"] == 2
+
+    prompt_detail = await owner_client.get(f"/api/v1/prompts/{prompt_id}")
+    assert prompt_detail.status_code == 200
+    env_tags = prompt_detail.json()["environment_tags"]
+    assert env_tags["staging"] == 2
+    assert env_tags["production"] is None
+    assert env_tags["dev"] is None
+
     promote = await owner_client.put(
         f"/api/v1/prompts/{prompt_id}/tags/production",
         params={"version_number": 2},
     )
     assert promote.status_code == 200
     assert promote.json()["version_number"] == 2
+
+    prompt_after_prod = await owner_client.get(f"/api/v1/prompts/{prompt_id}")
+    assert prompt_after_prod.json()["environment_tags"]["production"] == 2
+    assert prompt_after_prod.json()["environment_tags"]["staging"] == 2
 
     resolve = await owner_client.get(
         f"/api/v1/prompts/{prompt_id}/resolve",

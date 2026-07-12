@@ -91,6 +91,15 @@ class PromptCreate(BaseModel):
     metadata: dict | None = None
 
 
+ENVIRONMENT_TAGS = ("production", "staging", "dev")
+
+
+class PromptEnvironmentTags(BaseModel):
+    production: int | None = None
+    staging: int | None = None
+    dev: int | None = None
+
+
 class PromptResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -103,6 +112,7 @@ class PromptResponse(BaseModel):
     created_at: datetime
     latest_version_number: int | None = None
     production_tag_version: int | None = None
+    environment_tags: PromptEnvironmentTags = Field(default_factory=PromptEnvironmentTags)
 
 
 class PromptVersionCreate(BaseModel):

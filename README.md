@@ -77,15 +77,33 @@ scaleplane auth login
 | `scaleplane prompts list --project demo` | List prompts |
 | `scaleplane prompts push file.txt --project demo --name "System"` | Push prompt version |
 | `scaleplane prompts history system-prompt --project demo` | Version history |
-| `scaleplane prompts promote system-prompt --project demo --version 2` | Promote tag |
-| `scaleplane prompts resolve system-prompt --project demo` | Resolve production tag |
+| `scaleplane prompts promote system-prompt --project demo --version 2 --tag staging` | Promote version to an environment tag |
+| `scaleplane prompts resolve system-prompt --project demo --tag staging` | Resolve tagged prompt content |
+
+`promote` and `resolve` accept `--tag` / `-t` (default: `production`). Supported environment tags: `production`, `staging`, `dev`.
+
+### Prompt tags
+
+Versions are immutable snapshots; tags are movable pointers to a version. Creating a new version does not change what any tag serves until you promote.
+
+Test a new version in staging before releasing to production:
+
+```bash
+scaleplane prompts push prompt-v2.txt --project demo --name "System"
+scaleplane prompts promote system-prompt --project demo --version 2 --tag staging
+scaleplane prompts resolve system-prompt --project demo --tag staging
+# when satisfied:
+scaleplane prompts promote system-prompt --project demo --version 2 --tag production
+```
+
+The latest version number and tagged versions are independent — `prompts list` shows both separately.
 
 ## API overview
 
 - **Auth:** `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`
 - **Users:** `GET /api/v1/users/me`
 - **Org & RBAC:** `GET /api/v1/organizations/current`, member CRUD
-- **Prompts:** projects, versions, tags, resolve endpoint
+- **Prompts:** projects, versions, `PUT /prompts/{id}/tags/{tag}` (promote), `GET /prompts/{id}/resolve?tag=` (environment tags: `production`, `staging`, `dev`)
 - **Routing (stub):** providers, routing policies, `POST /api/v1/route/completions` (501)
 
 ## RBAC roles

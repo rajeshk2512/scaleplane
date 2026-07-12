@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FormEvent, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { api } from '../api/client'
+import { api, ENVIRONMENT_TAGS } from '../api/client'
 import { AppLayout } from '../components/AppLayout'
 import { Badge } from '../components/Badge'
 import { Button } from '../components/Button'
@@ -89,6 +89,8 @@ export function ProjectDetailPage() {
                 <th className="pb-3 font-medium">Name</th>
                 <th className="pb-3 font-medium">Latest version</th>
                 <th className="pb-3 font-medium">Production</th>
+                <th className="pb-3 font-medium">Staging</th>
+                <th className="pb-3 font-medium">Dev</th>
               </tr>
             </thead>
             <tbody>
@@ -101,13 +103,18 @@ export function ProjectDetailPage() {
                     <p className="font-mono text-xs text-slate">{p.slug}</p>
                   </td>
                   <td className="py-3">v{p.latest_version_number ?? '—'}</td>
-                  <td className="py-3">
-                    {p.production_tag_version ? (
-                      <Badge variant="amber">v{p.production_tag_version}</Badge>
-                    ) : (
-                      <span className="text-slate">—</span>
-                    )}
-                  </td>
+                  {ENVIRONMENT_TAGS.map((tag) => {
+                    const version = p.environment_tags?.[tag]
+                    return (
+                      <td key={tag} className="py-3">
+                        {version ? (
+                          <Badge variant={tag === 'production' ? 'amber' : 'teal'}>v{version}</Badge>
+                        ) : (
+                          <span className="text-slate">—</span>
+                        )}
+                      </td>
+                    )
+                  })}
                 </tr>
               ))}
             </tbody>

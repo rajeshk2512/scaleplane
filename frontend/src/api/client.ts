@@ -30,6 +30,15 @@ export interface Project {
   created_at: string
 }
 
+export const ENVIRONMENT_TAGS = ['production', 'staging', 'dev'] as const
+export type EnvironmentTag = (typeof ENVIRONMENT_TAGS)[number]
+
+export interface PromptEnvironmentTags {
+  production: number | null
+  staging: number | null
+  dev: number | null
+}
+
 export interface Prompt {
   id: string
   project_id: string
@@ -40,6 +49,7 @@ export interface Prompt {
   created_at: string
   latest_version_number: number | null
   production_tag_version: number | null
+  environment_tags: PromptEnvironmentTags
 }
 
 export interface PromptVersion {
