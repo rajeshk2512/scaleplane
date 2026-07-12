@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scaleplane-cli"
+version = "0.1.0"
+description = "ScalePlane CLI — prompt versioning and control plane"
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.15.0",
+    "httpx>=0.28.0",
+    "pyyaml>=6.0.2",
+    "rich>=13.9.0",
+]
+
+[project.scripts]
+scaleplane = "scaleplane_cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["scaleplane_cli"]

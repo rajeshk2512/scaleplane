@@ -1,0 +1,26 @@
+:root {
+  --color-navy: #0b1f3a;
+  --color-deep-blue: #12386b;
+  --color-teal: #0f8b8d;
+  --color-amber: #f5a623;
+  --color-slate: #4a5a70;
+  --color-mist: #e7eaee;
+  --color-cloud: #fafbfc;
+  --color-alert: #d64545;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  background-color: var(--color-cloud);
+  color: var(--color-navy);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+code, pre {
+  font-family: "JetBrains Mono", monospace;
+}

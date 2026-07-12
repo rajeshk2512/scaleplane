@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: scaleplane-postgres
+    environment:
+      POSTGRES_USER: scaleplane
+      POSTGRES_PASSWORD: scaleplane
+      POSTGRES_DB: scaleplane
+    ports:
+      - "5433:5432"
+    volumes:
+      - scaleplane_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scaleplane -d scaleplane"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # redis:
+  #   image: redis:7
+  #   container_name: scaleplane-redis
+  #   ports:
+  #     - "6379:6379"
+
+volumes:
+  scaleplane_pg_data:

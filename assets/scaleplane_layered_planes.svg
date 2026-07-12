@@ -1,0 +1,12 @@
+<svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ScalePlane logo">
+  <title>ScalePlane — Layered Planes</title>
+  <desc>Three stacked parallelogram planes of increasing width, rising from navy to deep blue to signal teal, capped by an amber node at the top-right growth edge.</desc>
+  <!-- bottom plane: smallest, Infra Navy -->
+  <polygon points="150,430 300,430 380,370 230,370" fill="#0B1F3A"/>
+  <!-- middle plane: Deep Blue -->
+  <polygon points="130,340 340,340 420,280 210,280" fill="#12386B"/>
+  <!-- top plane: widest, Signal Teal -->
+  <polygon points="110,250 390,250 470,190 190,190" fill="#0F8B8D"/>
+  <!-- amber growth node -->
+  <circle cx="470" cy="190" r="20" fill="#F5A623"/>
+</svg>
