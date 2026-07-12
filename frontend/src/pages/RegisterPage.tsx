@@ -18,8 +18,8 @@ export function RegisterPage() {
     e.preventDefault()
     setError('')
     try {
-      await register(email, password, fullName || undefined)
-      navigate('/')
+      const orgId = await register(email, password, fullName || undefined)
+      navigate(orgId ? '/' : '/onboarding')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed')
     }

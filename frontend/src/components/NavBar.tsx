@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
+import { api } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
 import { Button } from './Button'
 
@@ -11,8 +14,43 @@ const navItems = [
 ]
 
 export function NavBar() {
-  const { user, logout } = useAuth()
+  const { user, organizationId, logout, switchOrganization } = useAuth()
   const location = useLocation()
+  const [open, setOpen] = useState(false)
+  const [switching, setSwitching] = useState(false)
+
+  const { data: orgs = [] } = useQuery({
+    queryKey: ['organizations'],
+    queryFn: api.listOrgs,
+  })
+
+  const { data: currentOrg } = useQuery({
+    queryKey: ['org'],
+    queryFn: api.currentOrg,
+    enabled: !!organizationId,
+  })
+
+  const handleSwitch = async (orgId: string) => {
+    if (orgId === organizationId) {
+      setOpen(false)
+      return
+    }
+    setSwitching(true)
+    try {
+      await switchOrganization(orgId)
+      setOpen(false)
+    } finally {
+      setSwitching(false)
+    }
+  }
+
+  useEffect(() => {
+    const close = () => setOpen(false)
+    if (open) {
+      document.addEventListener('click', close)
+      return () => document.removeEventListener('click', close)
+    }
+  }, [open])
 
   return (
     <header className="border-b border-mist bg-deep-blue text-white">
@@ -39,6 +77,37 @@ export function NavBar() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          {orgs.length > 0 && (
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setOpen((value) => !value)}
+                className="rounded-brand border border-white/30 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+                disabled={switching}
+              >
+                {currentOrg?.name ?? 'Organization'} ▾
+              </button>
+              {open && (
+                <div className="absolute right-0 z-20 mt-2 min-w-[200px] rounded-brand border border-mist bg-white py-1 shadow-lg">
+                  {orgs.map((org) => (
+                    <button
+                      key={org.id}
+                      type="button"
+                      onClick={() => handleSwitch(org.id)}
+                      className={`block w-full px-4 py-2 text-left text-sm ${
+                        org.id === organizationId
+                          ? 'bg-cloud font-medium text-navy'
+                          : 'text-navy hover:bg-cloud'
+                      }`}
+                    >
+                      <span className="block">{org.name}</span>
+                      <span className="text-xs text-slate">{org.slug}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <span className="hidden text-sm text-white/80 sm:inline">{user?.email}</span>
           <Button variant="ghost" onClick={logout} className="!min-h-0 !border-white/30 !text-white">
             Sign out

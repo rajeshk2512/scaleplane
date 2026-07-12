@@ -64,6 +64,8 @@ cd cli
 ../backend/.venv/bin/pip install -e .
 scaleplane config set api_url http://127.0.0.1:8000/api/v1
 scaleplane auth login
+scaleplane orgs create --name "My Team" --slug my-team
+scaleplane projects list
 ```
 
 ## CLI commands
@@ -72,6 +74,10 @@ scaleplane auth login
 |---------|-------------|
 | `scaleplane auth login` | Authenticate with email/password |
 | `scaleplane auth whoami` | Show current user |
+| `scaleplane orgs list` | List organizations you belong to |
+| `scaleplane orgs current` | Show active organization |
+| `scaleplane orgs create --name X --slug x` | Create and activate an organization |
+| `scaleplane orgs switch <id-or-slug>` | Switch active organization |
 | `scaleplane projects list` | List projects |
 | `scaleplane projects create --name X --slug x` | Create project |
 | `scaleplane prompts list --project demo` | List prompts |

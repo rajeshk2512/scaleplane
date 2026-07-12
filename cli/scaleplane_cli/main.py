@@ -1,21 +1,70 @@
+import re
+
+import httpx
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from scaleplane_cli import api
-from scaleplane_cli.config import get_api_url, get_token, set_api_url, set_token
+from scaleplane_cli.config import (
+    get_api_url,
+    get_organization_id,
+    get_token,
+    set_api_url,
+    set_tokens,
+)
 
 console = Console()
 auth_app = typer.Typer(help="Authentication commands")
+orgs_app = typer.Typer(help="Organization management")
 projects_app = typer.Typer(help="Project management")
 prompts_app = typer.Typer(help="Prompt versioning")
 config_app = typer.Typer(help="CLI configuration")
 app = typer.Typer(help="ScalePlane CLI — enterprise infrastructure for agentic systems")
 
 app.add_typer(auth_app, name="auth")
+app.add_typer(orgs_app, name="orgs")
 app.add_typer(projects_app, name="projects")
 app.add_typer(prompts_app, name="prompts")
 app.add_typer(config_app, name="config")
+
+UUID_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+
+
+def slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower().strip())
+    return re.sub(r"^-+|-+$", "", slug)[:100]
+
+
+def _is_uuid(value: str) -> bool:
+    return bool(UUID_PATTERN.match(value))
+
+
+def _resolve_org_id(target: str) -> tuple[str, str]:
+    if _is_uuid(target):
+        return target, target
+
+    orgs = api.request("GET", "/organizations")
+    for org in orgs:
+        if org["slug"] == target or org["id"] == target:
+            return org["id"], org["name"]
+
+    console.print(f"[red]Organization not found: {target}[/red]")
+    raise typer.Exit(1)
+
+
+def _format_org_display() -> str:
+    org_id = get_organization_id()
+    if not org_id:
+        return "none"
+    try:
+        org = api.request("GET", "/organizations/current")
+        return f"{org['slug']} ({org['id']})"
+    except (api.ApiError, SystemExit):
+        return org_id
 
 
 @config_app.command("set")
@@ -34,6 +83,8 @@ def config_show() -> None:
     """Show current configuration."""
     console.print(f"API URL: {get_api_url()}")
     console.print(f"Authenticated: {'yes' if get_token() else 'no'}")
+    if get_token():
+        console.print(f"Organization: {_format_org_display()}")
 
 
 @auth_app.command("login")
@@ -42,16 +93,22 @@ def auth_login(
     password: str = typer.Option(..., prompt=True, hide_input=True),
 ) -> None:
     """Login with email and password."""
-    import httpx
-
     url = f"{get_api_url()}/auth/login"
     with httpx.Client() as client:
         response = client.post(url, json={"email": email, "password": password})
     if response.status_code != 200:
         console.print(f"[red]Login failed: {response.text}[/red]")
         raise typer.Exit(1)
-    set_token(response.json()["access_token"])
-    console.print("[green]Logged in successfully[/green]")
+
+    data = response.json()
+    set_tokens(data["access_token"], data["refresh_token"], data.get("organization_id"))
+    if data.get("organization_id"):
+        console.print("[green]Logged in successfully[/green]")
+    else:
+        console.print("[green]Logged in successfully[/green]")
+        console.print(
+            '[yellow]No organization active. Run: scaleplane orgs create --name "My Org" --slug my-org[/yellow]'
+        )
 
 
 @auth_app.command("whoami")
@@ -61,6 +118,74 @@ def auth_whoami() -> None:
     console.print(f"Email: {user['email']}")
     if user.get("full_name"):
         console.print(f"Name: {user['full_name']}")
+
+    if get_organization_id():
+        try:
+            org = api.request("GET", "/organizations/current")
+            console.print(f"Organization: {org['name']} ({org['slug']})")
+        except (api.ApiError, SystemExit):
+            pass
+
+
+@orgs_app.command("list")
+def orgs_list() -> None:
+    """List organizations you belong to."""
+    orgs = api.request("GET", "/organizations")
+    current_id = get_organization_id()
+    table = Table(title="Organizations")
+    table.add_column("")
+    table.add_column("Name")
+    table.add_column("Slug")
+    table.add_column("Role")
+    table.add_column("ID")
+    for org in orgs:
+        marker = "*" if org["id"] == current_id else ""
+        table.add_row(marker, org["name"], org["slug"], org["role"], org["id"])
+    console.print(table)
+
+
+@orgs_app.command("current")
+def orgs_current() -> None:
+    """Show the active organization."""
+    if not get_organization_id():
+        console.print(
+            '[red]No active organization. Run: scaleplane orgs create --name "My Org" --slug my-org[/red]'
+        )
+        raise typer.Exit(1)
+
+    org = api.request("GET", "/organizations/current")
+    console.print(f"Name: {org['name']}")
+    console.print(f"Slug: {org['slug']}")
+    console.print(f"ID: {org['id']}")
+
+
+@orgs_app.command("create")
+def orgs_create(
+    name: str = typer.Option(..., "--name", "-n"),
+    slug: str | None = typer.Option(None, "--slug", "-s"),
+) -> None:
+    """Create and activate an organization."""
+    org_slug = slug or slugify(name)
+    if not org_slug:
+        console.print("[red]Could not derive a slug from the organization name[/red]")
+        raise typer.Exit(1)
+
+    result = api.request("POST", "/organizations", json={"name": name, "slug": org_slug})
+    tokens = result["tokens"]
+    org = result["organization"]
+    set_tokens(tokens["access_token"], tokens["refresh_token"], tokens.get("organization_id"))
+    console.print(f"[green]Created organization {org['name']} ({org['slug']})[/green]")
+    console.print("[green]Organization is now active[/green]")
+
+
+@orgs_app.command("switch")
+def orgs_switch(target: str = typer.Argument(..., help="Organization ID or slug")) -> None:
+    """Switch the active organization."""
+    org_id, _ = _resolve_org_id(target)
+    result = api.request("POST", "/auth/switch-org", json={"organization_id": org_id})
+    set_tokens(result["access_token"], result["refresh_token"], result.get("organization_id"))
+    org = api.request("GET", "/organizations/current")
+    console.print(f"[green]Switched to organization {org['name']} ({org['slug']})[/green]")
 
 
 @projects_app.command("list")

@@ -17,8 +17,8 @@ export function LoginPage() {
     e.preventDefault()
     setError('')
     try {
-      await login(email, password)
-      navigate('/')
+      const orgId = await login(email, password)
+      navigate(orgId ? '/' : '/onboarding')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed')
     }

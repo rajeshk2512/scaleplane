@@ -7,18 +7,84 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.models import OrganizationMember, Role
-from app.rbac.deps import AuthContext, require_permission
+from app.core.security import issue_tokens
+from app.models import OrganizationMember, Role, User
+from app.rbac.deps import AuthContext, get_current_user, require_permission
 from app.rbac.permissions import Permission
-from app.schemas import MemberCreate, MemberResponse, MemberUpdate, OrganizationResponse
-from app.services import add_member
+from app.schemas import (
+    MemberCreate,
+    MemberResponse,
+    MemberUpdate,
+    OrganizationCreate,
+    OrganizationCreateResponse,
+    OrganizationResponse,
+    OrganizationUpdate,
+    OrganizationWithRoleResponse,
+    TokenResponse,
+)
+from app.services import add_member, create_organization, list_user_organizations, update_organization
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
+
+
+def _org_with_role(org, role: Role) -> OrganizationWithRoleResponse:
+    return OrganizationWithRoleResponse(
+        id=org.id,
+        slug=org.slug,
+        name=org.name,
+        is_default=org.is_default,
+        created_at=org.created_at,
+        role=role,
+    )
+
+
+@router.post("", response_model=OrganizationCreateResponse, status_code=status.HTTP_201_CREATED)
+async def create_org(
+    data: OrganizationCreate,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    try:
+        org, membership = await create_organization(db, user, data)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    org_id = str(org.id)
+    access_token, refresh_token = issue_tokens(str(user.id), org_id)
+    return OrganizationCreateResponse(
+        organization=_org_with_role(org, membership.role),
+        tokens=TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            organization_id=org.id,
+        ),
+    )
+
+
+@router.get("", response_model=list[OrganizationWithRoleResponse])
+async def list_orgs(
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    orgs = await list_user_organizations(db, user)
+    return [_org_with_role(org, role) for org, role in orgs]
 
 
 @router.get("/current", response_model=OrganizationResponse)
 async def get_current_org(ctx: Annotated[AuthContext, Depends(require_permission(Permission.org_read))]):
     return ctx.organization
+
+
+@router.patch("/current", response_model=OrganizationResponse)
+async def patch_current_org(
+    data: OrganizationUpdate,
+    ctx: Annotated[AuthContext, Depends(require_permission(Permission.org_update))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    try:
+        return await update_organization(db, ctx, data)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @router.get("/current/members", response_model=list[MemberResponse])

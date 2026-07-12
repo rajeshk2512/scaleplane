@@ -27,6 +27,11 @@ def request(method: str, path: str, **kwargs) -> dict | list | None:
             detail = response.json().get("detail", response.text)
         except Exception:
             detail = response.text
+        if response.status_code == 403 and detail == "No active organization":
+            console.print(
+                '[red]No active organization. Run: scaleplane orgs create --name "My Org" --slug my-org[/red]'
+            )
+            raise SystemExit(1)
         raise ApiError(f"{response.status_code}: {detail}")
 
     if response.status_code == 204:
