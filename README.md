@@ -11,9 +11,63 @@ ScalePlane/
 ├── backend/     # Python 3.12 + FastAPI API
 ├── frontend/    # React 18 + TypeScript + Vite
 ├── cli/         # Python Typer CLI
+├── sdks/        # Runtime SDKs (Python, TypeScript, Java)
 ├── assets/      # Brand logo and assets
 ├── docker-compose.yml
 └── Makefile
+```
+
+## SDKs
+
+Runtime-first clients for prompt resolve/promote and routing live under [`sdks/`](sdks/). Models are generated from the OpenAPI snapshot; resource methods are hand-written (hybrid OCP). See [`sdks/EXTENSION.md`](sdks/EXTENSION.md) for how to add a new backend feature to all three SDKs.
+
+```bash
+make sdk-export     # refresh sdks/openapi/scaleplane.openapi.json from FastAPI
+make sdk-generate   # regenerate models in Python / TypeScript / Java
+make sdk-test       # run SDK unit tests
+```
+
+**Python**
+
+```bash
+cd sdks/python && pip install -e ".[dev]"
+```
+
+```python
+from scaleplane import ScalePlaneClient
+
+client = ScalePlaneClient(base_url="http://127.0.0.1:8000/api/v1", token="...")
+resolved = client.prompts.resolve_by_slug("demo", "system-prompt", tag="production")
+print(resolved.content)
+```
+
+**TypeScript**
+
+```bash
+cd sdks/typescript && npm install && npm run build
+```
+
+```ts
+import { ScalePlaneClient } from '@scaleplane/sdk'
+
+const client = new ScalePlaneClient({
+  baseUrl: 'http://127.0.0.1:8000/api/v1',
+  token: '...',
+})
+const resolved = await client.prompts.resolveBySlug('demo', 'system-prompt', { tag: 'production' })
+console.log(resolved.content)
+```
+
+**Java**
+
+```bash
+cd sdks/java && mvn test
+```
+
+```java
+var client = new ScalePlaneClient("http://127.0.0.1:8000/api/v1", "...");
+var resolved = client.prompts().resolveBySlug("demo", "system-prompt", "production");
+System.out.println(resolved.getContent());
 ```
 
 ## Prerequisites
