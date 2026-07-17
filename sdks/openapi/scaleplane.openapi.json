@@ -1,0 +1,2449 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ScalePlane API",
+    "description": "Enterprise infrastructure for agentic systems \u2014 prompt versioning and routing control plane",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegister"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Refresh",
+        "operationId": "refresh_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/switch-org": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Switch Org",
+        "operationId": "switch_org_api_v1_auth_switch_org_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchOrgRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get Me",
+        "operationId": "get_me_api_v1_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations": {
+      "get": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "List Orgs",
+        "operationId": "list_orgs_api_v1_organizations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrganizationWithRoleResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Orgs Api V1 Organizations Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Create Org",
+        "operationId": "create_org_api_v1_organizations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/current": {
+      "get": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Get Current Org",
+        "operationId": "get_current_org_api_v1_organizations_current_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Patch Current Org",
+        "operationId": "patch_current_org_api_v1_organizations_current_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/current/members": {
+      "get": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "List Members",
+        "operationId": "list_members_api_v1_organizations_current_members_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MemberResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Members Api V1 Organizations Current Members Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Create Member",
+        "operationId": "create_member_api_v1_organizations_current_members_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/current/members/{user_id}": {
+      "patch": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Update Member",
+        "operationId": "update_member_api_v1_organizations_current_members__user_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "organizations"
+        ],
+        "summary": "Delete Member",
+        "operationId": "delete_member_api_v1_organizations_current_members__user_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "List Projects",
+        "operationId": "list_projects_api_v1_projects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Projects Api V1 Projects Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Create Project Endpoint",
+        "operationId": "create_project_endpoint_api_v1_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get Project",
+        "operationId": "get_project_api_v1_projects__project_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project_id}/prompts": {
+      "get": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "List Prompts",
+        "operationId": "list_prompts_api_v1_projects__project_id__prompts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromptResponse"
+                  },
+                  "title": "Response List Prompts Api V1 Projects  Project Id  Prompts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "Create Prompt Endpoint",
+        "operationId": "create_prompt_endpoint_api_v1_projects__project_id__prompts_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/prompts/{prompt_id}": {
+      "get": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "Get Prompt",
+        "operationId": "get_prompt_api_v1_prompts__prompt_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "prompt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prompt Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/prompts/{prompt_id}/versions": {
+      "post": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "Create Version",
+        "operationId": "create_version_api_v1_prompts__prompt_id__versions_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "prompt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prompt Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptVersionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptVersionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "List Versions",
+        "operationId": "list_versions_api_v1_prompts__prompt_id__versions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "prompt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prompt Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromptVersionResponse"
+                  },
+                  "title": "Response List Versions Api V1 Prompts  Prompt Id  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/prompts/{prompt_id}/versions/{version_id}": {
+      "get": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "Get Version",
+        "operationId": "get_version_api_v1_prompts__prompt_id__versions__version_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "prompt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prompt Id"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptVersionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/prompts/{prompt_id}/tags/{tag_name}": {
+      "put": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "Promote Prompt Tag",
+        "operationId": "promote_prompt_tag_api_v1_prompts__prompt_id__tags__tag_name__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "prompt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prompt Id"
+            }
+          },
+          {
+            "name": "tag_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tag Name"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version Id"
+            }
+          },
+          {
+            "name": "version_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version Number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptTagResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/prompts/{prompt_id}/resolve": {
+      "get": {
+        "tags": [
+          "prompts"
+        ],
+        "summary": "Resolve Prompt Endpoint",
+        "operationId": "resolve_prompt_endpoint_api_v1_prompts__prompt_id__resolve_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "prompt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Prompt Id"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "production",
+              "title": "Tag"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptResolveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/providers": {
+      "get": {
+        "tags": [
+          "routing"
+        ],
+        "summary": "List Providers",
+        "operationId": "list_providers_api_v1_providers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Providers Api V1 Providers Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "routing"
+        ],
+        "summary": "Create Provider",
+        "operationId": "create_provider_api_v1_providers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/routing-policies": {
+      "get": {
+        "tags": [
+          "routing"
+        ],
+        "summary": "List Routing Policies",
+        "operationId": "list_routing_policies_api_v1_routing_policies_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoutingPolicyResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Routing Policies Api V1 Routing Policies Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "routing"
+        ],
+        "summary": "Create Routing Policy",
+        "operationId": "create_routing_policy_api_v1_routing_policies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutingPolicyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingPolicyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/route/completions": {
+      "post": {
+        "tags": [
+          "routing"
+        ],
+        "summary": "Route Completions",
+        "operationId": "route_completions_api_v1_route_completions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "501": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionNotImplementedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CompletionNotImplementedResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "future_capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Future Capabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail",
+          "message",
+          "future_capabilities"
+        ],
+        "title": "CompletionNotImplementedResponse"
+      },
+      "CompletionRequest": {
+        "properties": {
+          "prompt_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Id"
+          },
+          "prompt_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Slug"
+          },
+          "tag": {
+            "type": "string",
+            "title": "Tag",
+            "default": "production"
+          },
+          "messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          }
+        },
+        "type": "object",
+        "title": "CompletionRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MemberCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role",
+            "default": "viewer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "MemberCreate"
+      },
+      "MemberResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "email",
+          "full_name",
+          "role",
+          "created_at"
+        ],
+        "title": "MemberResponse"
+      },
+      "MemberUpdate": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "MemberUpdate"
+      },
+      "OrganizationCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Slug"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "OrganizationCreate"
+      },
+      "OrganizationCreateResponse": {
+        "properties": {
+          "organization": {
+            "$ref": "#/components/schemas/OrganizationWithRoleResponse"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/TokenResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "organization",
+          "tokens"
+        ],
+        "title": "OrganizationCreateResponse"
+      },
+      "OrganizationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "is_default",
+          "created_at"
+        ],
+        "title": "OrganizationResponse"
+      },
+      "OrganizationUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1,
+                "pattern": "^[a-z0-9-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          }
+        },
+        "type": "object",
+        "title": "OrganizationUpdate"
+      },
+      "OrganizationWithRoleResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "is_default",
+          "created_at",
+          "role"
+        ],
+        "title": "OrganizationWithRoleResponse"
+      },
+      "ProjectCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Slug"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "ProjectCreate"
+      },
+      "ProjectResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "name",
+          "slug",
+          "description",
+          "created_at"
+        ],
+        "title": "ProjectResponse"
+      },
+      "PromptCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Slug"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Content"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug",
+          "content"
+        ],
+        "title": "PromptCreate"
+      },
+      "PromptEnvironmentTags": {
+        "properties": {
+          "production": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Production"
+          },
+          "staging": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staging"
+          },
+          "dev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dev"
+          }
+        },
+        "type": "object",
+        "title": "PromptEnvironmentTags"
+      },
+      "PromptResolveResponse": {
+        "properties": {
+          "prompt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prompt Id"
+          },
+          "prompt_slug": {
+            "type": "string",
+            "title": "Prompt Slug"
+          },
+          "tag": {
+            "type": "string",
+            "title": "Tag"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Version Id"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt_id",
+          "prompt_slug",
+          "tag",
+          "version_id",
+          "version_number",
+          "content",
+          "content_hash"
+        ],
+        "title": "PromptResolveResponse"
+      },
+      "PromptResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Project Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "latest_version_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Version Number"
+          },
+          "production_tag_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Production Tag Version"
+          },
+          "environment_tags": {
+            "$ref": "#/components/schemas/PromptEnvironmentTags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "project_id",
+          "organization_id",
+          "name",
+          "slug",
+          "description",
+          "created_at"
+        ],
+        "title": "PromptResponse"
+      },
+      "PromptTagResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "prompt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prompt Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Version Id"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "promoted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Promoted At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "prompt_id",
+          "name",
+          "version_id",
+          "version_number",
+          "promoted_at"
+        ],
+        "title": "PromptTagResponse"
+      },
+      "PromptVersionCreate": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Content"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
+          "parent_version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Version Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "PromptVersionCreate"
+      },
+      "PromptVersionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "prompt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prompt Id"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
+          "parent_version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Version Id"
+          },
+          "created_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "prompt_id",
+          "version_number",
+          "content",
+          "content_hash",
+          "parent_version_id",
+          "created_by_id",
+          "created_at"
+        ],
+        "title": "PromptVersionResponse"
+      },
+      "ProviderCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "provider_type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Config"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "provider_type"
+        ],
+        "title": "ProviderCreate"
+      },
+      "ProviderResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "provider_type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Config"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "name",
+          "provider_type",
+          "config",
+          "is_active",
+          "created_at"
+        ],
+        "title": "ProviderResponse"
+      },
+      "ProviderType": {
+        "type": "string",
+        "enum": [
+          "openai",
+          "anthropic",
+          "local_slm"
+        ],
+        "title": "ProviderType"
+      },
+      "RefreshRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshRequest"
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "owner",
+          "admin",
+          "editor",
+          "viewer"
+        ],
+        "title": "Role"
+      },
+      "RoutingPolicyCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "rules": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Rules"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "RoutingPolicyCreate"
+      },
+      "RoutingPolicyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "rules": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Rules"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "name",
+          "rules",
+          "is_active",
+          "created_at"
+        ],
+        "title": "RoutingPolicyResponse"
+      },
+      "SwitchOrgRequest": {
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "organization_id"
+        ],
+        "title": "SwitchOrgRequest"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "organization_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserLogin": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserLogin"
+      },
+      "UserRegister": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "title": "Password"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserRegister"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "created_at"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

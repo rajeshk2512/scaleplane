@@ -26,6 +26,10 @@ dist-ssr/
 .npm
 .yarn
 
+# Java / Maven
+sdks/java/target/
+.openapi-generator/
+openapitools.json
 # Environment & secrets
 .env
 .env.*

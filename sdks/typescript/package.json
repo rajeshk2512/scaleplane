@@ -1,0 +1,33 @@
+{
+  "name": "@scaleplane/sdk",
+  "version": "0.1.0",
+  "description": "ScalePlane TypeScript SDK — runtime prompt resolve/promote and routing",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "generate": "openapi-typescript ../openapi/scaleplane.openapi.json -o src/generated/schema.ts",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "openapi-typescript": "^7.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

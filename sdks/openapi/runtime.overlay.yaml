@@ -1,0 +1,8 @@
+# Documents the runtime SDK surface (hand-written resources).
+# Models are generated from the full OpenAPI snapshot; resources only call these operations.
+runtime_operations:
+  - GET /api/v1/projects
+  - GET /api/v1/projects/{project_id}/prompts
+  - GET /api/v1/prompts/{prompt_id}/resolve
+  - PUT /api/v1/prompts/{prompt_id}/tags/{tag_name}
+  - POST /api/v1/route/completions
